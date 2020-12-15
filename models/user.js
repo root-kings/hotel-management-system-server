@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const mongoosePaginate = require('mongoose-paginate')
 
 const Schema = mongoose.Schema
 
@@ -10,9 +9,6 @@ const UserSchema = new Schema(
       required: true
     },
     phone: {
-      type: String
-    },
-    email: {
       type: String,
       required: true,
       unique: true,
@@ -24,7 +20,7 @@ const UserSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['root'],
+      enum: ['root', 'admin', 'manager', 'viewer'],
       required: true
     }
   },
@@ -37,8 +33,6 @@ const UserSchema = new Schema(
     }
   }
 )
-
-UserSchema.plugin(mongoosePaginate)
 
 const UserModel = mongoose.model('User', UserSchema)
 
