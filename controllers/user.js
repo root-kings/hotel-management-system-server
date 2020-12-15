@@ -41,11 +41,11 @@ exports.details_get = (req, res) => {
 }
 
 exports.create_post = (req, res) => {
-  const { name, email, password, type } = req.body
+  const { name, phone, password, type } = req.body
 
   let newUser = new User({
     name,
-    email,
+    phone,
     password,
     type
   })

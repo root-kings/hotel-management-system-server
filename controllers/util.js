@@ -14,10 +14,10 @@ exports.checkUsernameAvailability = (req, res) => {
     })
 }
 
-exports.checkEmailAvailability = (req, res) => {
-  const { email } = req.query
+exports.checkPhoneAvailability = (req, res) => {
+  const { phone } = req.query
 
-  User.findOne({ email })
+  User.findOne({ phone })
     .then(doc => {
       if (doc) return res.send(false)
       else return res.send(true)
