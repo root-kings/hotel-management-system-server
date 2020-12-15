@@ -1,7 +1,11 @@
-const allowRoot = async (req, res, next) => {
-  let { type } = req.decoded.user
+const User = require('../models/user').model
 
-  if (type === 'root') {
+const allowRoot = async (req, res, next) => {
+  const { _id } = req.decoded.user
+
+  const user = await User.findOne({ _id })
+
+  if (user.type === 'root') {
     next()
   } else {
     let result = {
