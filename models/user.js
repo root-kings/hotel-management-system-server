@@ -18,6 +18,9 @@ const UserSchema = new Schema(
       type: String,
       required: true
     },
+    pin: {
+      type: String
+    },
     type: {
       type: String,
       enum: ['root', 'admin', 'manager', 'viewer'],
