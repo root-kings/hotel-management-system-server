@@ -22,6 +22,8 @@ exports.details_get = (req, res) => {
   }
 
   Hotel.findOne(query)
+    .populate('managers')
+    .populate('viewers')
     .lean()
     .then(doc => {
       return res.send(doc)
