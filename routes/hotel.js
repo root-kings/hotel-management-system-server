@@ -7,6 +7,8 @@ const hotelController = require('../controllers/hotel')
 
 // Controllers -----
 
+router.get('/details', validateToken, hotelController.details_for_offline_get)
+
 router.get('/:hotelid', validateToken, hotelController.details_get)
 
 router.get('/:hotelid/floors', validateToken, hotelController.list_floors_get)

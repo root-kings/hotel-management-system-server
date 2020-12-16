@@ -40,7 +40,7 @@ const BookingSchema = new Schema(
 
 BookingSchema.plugin(mongoosePaginate)
 
-const BookingModel = mongoose.model('Room', BookingSchema)
+const BookingModel = mongoose.model('Booking', BookingSchema)
 
 module.exports = {
   model: BookingModel,

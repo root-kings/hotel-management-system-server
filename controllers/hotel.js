@@ -1,5 +1,6 @@
 const Hotel = require('../models/hotel').model
 const Room = require('../models/room').model
+const Booking = require('../models/booking').model
 const Floor = require('../models/floor').model
 const User = require('../models/user').model
 
@@ -35,6 +36,41 @@ exports.details_get = (req, res) => {
       console.error({ err })
       return res.status(500).send({ err })
     })
+}
+
+exports.details_for_offline_get = async (req, res) => {
+  const { user } = req.decoded
+  const { userType: type } = req.query
+
+  let query = {
+    [type + 's']: user
+  }
+
+  try {
+    let hotel = await Hotel.findOne(query).lean()
+    console.log(hotel)
+    if (hotel) {
+      hotel.floors = await Floor.find({ hotel }).lean()
+
+      hotel.rooms = await Room.find({
+        floor: {
+          $in: hotel.floors
+        }
+      }).lean()
+
+      hotel.bookings = await Booking.find({
+        room: {
+          $in: hotel.rooms
+        }
+      }).lean()
+
+      return res.send(hotel)
+    }
+    return res.status(404).send('no such hotel')
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
 }
 
 exports.create_post = (req, res) => {
