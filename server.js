@@ -1,7 +1,6 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
-const logger = require('morgan')
 // const multer = require('multer')
 // const path = require('path')
 const http = require('http')
@@ -34,6 +33,7 @@ let db = mongoose.connection
 db.on('error', console.error.bind(console, 'MongoDB connection error:'))
 
 if (process.env.NODE_ENV === 'development') {
+  const logger = require('morgan')
   app.use(logger('dev'))
 }
 
