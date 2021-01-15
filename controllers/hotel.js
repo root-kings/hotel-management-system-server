@@ -73,23 +73,39 @@ exports.details_for_offline_get = async (req, res) => {
   }
 }
 
-exports.create_post = (req, res) => {
-  const { name, owner } = req.body
+exports.create_post = async (req, res) => {
+  const { name, owner, rooms } = req.body
 
   let newHotel = new Hotel({
     name,
     owner
   })
 
-  newHotel
-    .save()
-    .then(doc => {
-      return res.send(doc)
-    })
-    .catch(err => {
-      console.error({ err })
-      return res.status(500).send({ err })
-    })
+  let newFloor = new Floor({
+    label: 'Group 1',
+    order: 0,
+    hotel: newHotel
+  })
+
+  try {
+    await newHotel.save()
+
+    await newFloor.save()
+
+    for (let i = 0; i < rooms; i++) {
+      let newRoom = new Room({
+        label: i + 1,
+        floor: newFloor
+      })
+
+      await newRoom.save()
+    }
+
+    return res.send(newHotel)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
 }
 
 exports.delete_delete = async (req, res) => {
