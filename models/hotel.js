@@ -26,9 +26,42 @@ const HotelSchema = new Schema(
         required: true
       }
     ],
+
     banner: {
       type: String
-    }
+    },
+
+    floors: [
+      {
+        label: {
+          type: String,
+          required: true
+        },
+        order: {
+          type: Number,
+          default: 0,
+          required: true
+        },
+        rooms: [
+          {
+            label: {
+              type: String,
+              required: true
+            },
+            occupied: {
+              type: Boolean,
+              default: false,
+              required: true
+            },
+            available: {
+              type: Boolean,
+              default: true,
+              required: true
+            }
+          }
+        ]
+      }
+    ]
   },
   {
     toJSON: {

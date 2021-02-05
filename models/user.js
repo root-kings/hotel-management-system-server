@@ -21,6 +21,10 @@ const UserSchema = new Schema(
     pin: {
       type: String
     },
+    hotel: {
+      type: Schema.Types.ObjectId,
+      ref: 'Hotel',
+    },
     type: {
       type: String,
       enum: ['root', 'admin', 'manager', 'viewer'],

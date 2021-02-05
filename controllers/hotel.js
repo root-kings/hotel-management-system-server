@@ -1,7 +1,5 @@
 const Hotel = require('../models/hotel').model
-const Room = require('../models/room').model
-const Booking = require('../models/booking').model
-const Floor = require('../models/floor').model
+// const Booking = require('../models/booking').model
 const User = require('../models/user').model
 
 exports.list_get = (req, res) => {
@@ -38,74 +36,54 @@ exports.details_get = (req, res) => {
     })
 }
 
-exports.details_for_offline_get = async (req, res) => {
-  const { user } = req.decoded
-  const { userType: type } = req.query
-
-  let query = {
-    [type + 's']: user
-  }
-
-  try {
-    let hotel = await Hotel.findOne(query).lean()
-    console.log(hotel)
-    if (hotel) {
-      hotel.floors = await Floor.find({ hotel }).lean()
-
-      hotel.rooms = await Room.find({
-        floor: {
-          $in: hotel.floors
-        }
-      }).lean()
-
-      hotel.bookings = await Booking.find({
-        room: {
-          $in: hotel.rooms
-        }
-      }).lean()
-
-      return res.send(hotel)
-    }
-    return res.status(404).send('no such hotel')
-  } catch (err) {
-    console.error({ err })
-    return res.status(500).send({ err })
-  }
-}
-
 exports.create_post = async (req, res) => {
   const { name, owner, rooms } = req.body
 
+  let floors = [
+    {
+      label: 'Base',
+      order: 0,
+      rooms: []
+    }
+  ]
+
+  for (let i = 0; i < rooms; i++) {
+    let room = {
+      label: i + 1,
+      occupied: false,
+      available: true
+    }
+    floors[0].rooms.push(room)
+  }
+
   let newHotel = new Hotel({
     name,
-    owner
-  })
-
-  let newFloor = new Floor({
-    label: 'Group 1',
-    order: 0,
-    hotel: newHotel
+    owner,
+    floors
   })
 
   try {
     await newHotel.save()
-
-    await newFloor.save()
-
-    for (let i = 0; i < rooms; i++) {
-      let newRoom = new Room({
-        label: i + 1,
-        floor: newFloor
-      })
-
-      await newRoom.save()
-    }
 
     return res.send(newHotel)
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
   }
+}
+
+exports.rooms_update_put = async (req, res) => {
+  const { floors } = req.body
+  const { hotelid } = req.params
+
+  Hotel.updateOne({ _id: hotelid }, { floors })
+    .then(docs => {
+      return res.send(docs)
+    })
+    .catch(err => {
+      console.error({ err })
+      return res.status(500).send({ err })
+    })
 }
 
 exports.delete_delete = async (req, res) => {
@@ -125,105 +103,32 @@ exports.delete_delete = async (req, res) => {
     })
 }
 
-exports.create_room_post = (req, res) => {
-  const { label, floor } = req.body
-
-  let newRoom = new Room({
-    label,
-    floor
-  })
-
-  newRoom
-    .save()
-    .then(doc => {
-      return res.send(doc)
-    })
-    .catch(err => {
-      console.error({ err })
-      return res.status(500).send({ err })
-    })
-}
-
-exports.create_floor_post = (req, res) => {
-  const { label, order } = req.body
-  const { hotelid: hotel } = req.params
-
-  let newFloor = new Floor({
-    label,
-    order,
-    hotel
-  })
-
-  newFloor
-    .save()
-    .then(doc => {
-      return res.send(doc)
-    })
-    .catch(err => {
-      console.error({ err })
-      return res.status(500).send({ err })
-    })
-}
-
-exports.list_rooms_get = async (req, res) => {
-  const { hotelid: hotel } = req.params
-
-  try {
-    const floors = await Floor.find({ hotel })
-
-    const rooms = await Room.find({
-      floor: {
-        $in: floors
-      }
-    })
-      .populate('floor')
-      .lean()
-
-    return res.send(rooms)
-  } catch (err) {
-    console.error({ err })
-    return res.status(500).send({ err })
-  }
-}
-
-exports.list_floors_get = async (req, res) => {
-  const { hotelid: hotel } = req.params
-
-  try {
-    const floors = await Floor.find({ hotel }).lean()
-
-    return res.send(floors)
-  } catch (err) {
-    console.error({ err })
-    return res.status(500).send({ err })
-  }
-}
-
-exports.create_user_post = async (req, res) => {
+exports.user_create_post = async (req, res) => {
   const { name, phone, password, type, pin } = req.body
-  const { hotelid: _id } = req.params
+  const { hotelid } = req.params
 
   let newUser = new User({
     name,
     phone,
     password,
     type,
-    pin
+    pin,
+    hotel: hotelid
   })
 
-  let updateQuery = {
-    $push: {
-      [type + 's']: newUser
-    }
-  }
+  let hotel = await Hotel.findOne({ _id: hotelid })
 
-  try {
-    await newUser.save()
-    await Hotel.updateOne({ _id }, updateQuery)
+  hotel[type + 's'].push(newUser)
 
-    return res.send({ success: true })
-  } catch (err) {
-    console.error({ err })
-    return res.status(500).send({ err })
-  }
+  await hotel.save()
+
+  newUser
+    .save()
+    .then(doc => {
+      return res.send(doc)
+    })
+    .catch(err => {
+      console.error({ err })
+      return res.status(500).send({ err })
+    })
 }
