@@ -13,17 +13,3 @@ exports.checkUsernameAvailability = (req, res) => {
       return res.status(500).send({ err })
     })
 }
-
-exports.checkPhoneAvailability = (req, res) => {
-  const { phone } = req.query
-
-  User.findOne({ phone })
-    .then(doc => {
-      if (doc) return res.send(false)
-      else return res.send(true)
-    })
-    .catch(err => {
-      console.error({ err })
-      return res.status(500).send({ err })
-    })
-}

@@ -104,12 +104,12 @@ exports.delete_delete = async (req, res) => {
 }
 
 exports.user_create_post = async (req, res) => {
-  const { name, phone, password, type, pin } = req.body
+  const { name, username, password, type, pin } = req.body
   const { hotelid } = req.params
 
   let newUser = new User({
     name,
-    phone,
+    username,
     password,
     type,
     pin,

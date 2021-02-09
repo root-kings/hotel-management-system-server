@@ -3,9 +3,9 @@ const jwt = require('jsonwebtoken')
 const User = require('../models/user').model
 
 exports.login_post = async (req, res) => {
-  const { phone, password } = req.body
+  const { username, password } = req.body
 
-  User.findOne({ phone, password })
+  User.findOne({ username, password })
     .lean()
     .then(user => {
       if (user) {

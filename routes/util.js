@@ -11,7 +11,6 @@ router.get(
   utilController.checkUsernameAvailability
 )
 
-router.get('/checkPhoneAvailability', utilController.checkPhoneAvailability)
 
 router.get('/', (req, res) => {
   res.send('Please read documentation for the API. (util)')
