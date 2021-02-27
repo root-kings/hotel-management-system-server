@@ -12,6 +12,8 @@ router.get('/', validateToken, userController.list_get)
 
 router.post('/', validateToken, userController.create_post)
 
+router.put('/:userid', validateToken, userController.update_put)
+
 router.delete('/:userid', validateToken, userController.delete_delete)
 
 router.get('/', (req, res) => {

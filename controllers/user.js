@@ -62,6 +62,31 @@ exports.create_post = (req, res) => {
     })
 }
 
+exports.update_put = (req, res) => {
+  const { name, username, password, type, pin } = req.body
+  const { userid } = req.params
+
+  User.updateOne(
+    {
+      _id: userid
+    },
+    {
+      name,
+      username,
+      password,
+      type,
+      pin
+    }
+  )
+    .then(doc => {
+      return res.send(doc)
+    })
+    .catch(err => {
+      console.error({ err })
+      return res.status(500).send({ err })
+    })
+}
+
 exports.delete_delete = async (req, res) => {
   const { userid } = req.params
 
