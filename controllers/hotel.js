@@ -37,7 +37,7 @@ exports.details_get = (req, res) => {
 }
 
 exports.create_post = async (req, res) => {
-  const { name, owner, rooms } = req.body
+  const { name, owner, rooms, banner } = req.body
 
   let floors = [
     {
@@ -59,13 +59,36 @@ exports.create_post = async (req, res) => {
   let newHotel = new Hotel({
     name,
     owner,
-    floors
+    floors,
+    banner
   })
 
   try {
     await newHotel.save()
 
     return res.send(newHotel)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.update_put = async (req, res) => {
+  const { name, owner, rooms, banner } = req.body
+  const { hotelid } = req.params
+
+  let hotel = await Hotel.findOne({
+    _id: hotelid
+  })
+
+  hotel.name = name
+  hotel.owner = owner
+  hotel.banner = banner
+
+  try {
+    await hotel.save()
+
+    return res.send(hotel)
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
