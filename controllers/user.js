@@ -64,44 +64,43 @@ exports.create_post = (req, res) => {
 }
 
 exports.update_put = async (req, res) => {
-  const { name, username, password, type, pin, hotel } = req.body
+  const { name, username, password, type, pin } = req.body
   const { userid } = req.params
 
-  if (type == 'viewer') {
-    await Hotel.updateOne({
-      $pull: {
-        managers: userid
-      },
-      $push: {
-        viewers: userid
-      }
-    })
-  }
+  const oldUser = await User.findOne({ _id: userid })
 
-  if (type == 'manager') {
-    await Hotel.updateOne({
-      $pull: {
-        viewers: userid
-      },
-      $push: {
-        managers: userid
-      }
-    })
-  }
-
-  User.updateOne(
-    {
-      _id: userid
-    },
-    {
-      name,
-      username,
-      password,
-      type,
-      pin,
-      hotel
+  if (type != oldUser.type) {
+    if (type == 'viewer') {
+      await Hotel.updateOne({
+        $pull: {
+          managers: userid
+        },
+        $push: {
+          viewers: userid
+        }
+      })
     }
-  )
+
+    if (type == 'manager') {
+      await Hotel.updateOne({
+        $pull: {
+          viewers: userid
+        },
+        $push: {
+          managers: userid
+        }
+      })
+    }
+  }
+
+  oldUser.name = name
+  oldUser.username = username
+  oldUser.password = password
+  oldUser.type = type
+  oldUser.pin = pin
+
+  oldUser
+    .save()
     .then(doc => {
       return res.send(doc)
     })
