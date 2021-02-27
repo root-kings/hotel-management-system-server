@@ -1,4 +1,5 @@
 const User = require('../models/user').model
+const Hotel = require('../models/hotel').model
 
 exports.list_get = (req, res) => {
   const { type } = req.query
@@ -62,9 +63,31 @@ exports.create_post = (req, res) => {
     })
 }
 
-exports.update_put = (req, res) => {
-  const { name, username, password, type, pin } = req.body
+exports.update_put = async (req, res) => {
+  const { name, username, password, type, pin, hotel } = req.body
   const { userid } = req.params
+
+  if (type == 'viewer') {
+    await Hotel.updateOne({
+      $pull: {
+        managers: userid
+      },
+      $push: {
+        viewers: userid
+      }
+    })
+  }
+
+  if (type == 'manager') {
+    await Hotel.updateOne({
+      $pull: {
+        viewers: userid
+      },
+      $push: {
+        managers: userid
+      }
+    })
+  }
 
   User.updateOne(
     {
@@ -75,7 +98,8 @@ exports.update_put = (req, res) => {
       username,
       password,
       type,
-      pin
+      pin,
+      hotel
     }
   )
     .then(doc => {
