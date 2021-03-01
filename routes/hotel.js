@@ -22,6 +22,8 @@ router.delete(
 
 router.put('/:hotelid/rooms', validateToken, hotelController.rooms_update_put)
 
+router.put('/:hotelid/bookings', validateToken, hotelController.bookings_put)
+
 router.put('/:hotelid', validateToken, allowAdmin, hotelController.update_put)
 
 router.post(

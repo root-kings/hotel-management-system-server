@@ -5,13 +5,11 @@ const Schema = mongoose.Schema
 
 const BookingSchema = new Schema(
   {
-    rent: {
-      type: Number,
-      required: true
-    },
+    // rent: {
+    //   type: Number,
+    // },
     checkOut: {
-      type: Date,
-      required: true
+      type: Date
     },
     checkIn: {
       type: Date,
@@ -21,7 +19,16 @@ const BookingSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Room',
       required: true
+    },
+    hotel: {
+      type: Schema.Types.ObjectId,
+      ref: 'Hotel',
+      required: true
+    },
+    nedbId: {
+      type: String
     }
+
     // guest: {
     //   type: Schema.Types.ObjectId,
     //   ref: 'Guest',

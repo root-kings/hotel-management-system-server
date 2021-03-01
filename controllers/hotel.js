@@ -1,5 +1,5 @@
 const Hotel = require('../models/hotel').model
-// const Booking = require('../models/booking').model
+const Booking = require('../models/booking').model
 const User = require('../models/user').model
 
 exports.list_get = (req, res) => {
@@ -154,4 +154,30 @@ exports.user_create_post = async (req, res) => {
       console.error({ err })
       return res.status(500).send({ err })
     })
+}
+
+exports.bookings_put = async (req, res) => {
+  let bookings = req.body
+  let { hotelid } = req.params
+
+  let newBookings = bookings.filter(b => !b.checkOut)
+  let oldBookings = bookings.filter(b => b.checkOut)
+
+  newBookings.forEach(nb => {
+    nb.nedbId = nb._id
+    delete nb._id
+    nb.hotel = hotelid
+  })
+
+  await Booking.insertMany(newBookings)
+
+  for (let i = 0; i < oldBookings.length; i++) {
+    let bk = await Booking.findOne({ _id: oldBookings[i]._id })
+    if (bk) {
+      bk.checkOut = oldBookings[i].checkOut
+      await bk.save()
+    }
+  }
+
+  res.send({ success: true })
 }

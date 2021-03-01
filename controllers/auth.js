@@ -1,13 +1,14 @@
 const jwt = require('jsonwebtoken')
 
 const User = require('../models/user').model
+const Booking = require('../models/booking').model
 
 exports.login_post = async (req, res) => {
   const { username, password } = req.body
 
   User.findOne({ username, password })
     .lean()
-    .then(user => {
+    .then(async user => {
       if (user) {
         // Create a token
         const payload = { user }
@@ -18,10 +19,18 @@ exports.login_post = async (req, res) => {
         const secret = process.env.JWT_SECRET
         const token = jwt.sign(payload, secret, options)
 
+        let bookings = await Booking.find({
+          hotel: user.hotel
+          // checkOut: {
+          //   $exists: false
+          // }
+        })
+
         return res.send({
           status: true,
           token,
-          user
+          user,
+          bookings
         })
       } else {
         return res.send({
