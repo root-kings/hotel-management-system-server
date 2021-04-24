@@ -24,6 +24,12 @@ router.put('/:hotelid/rooms', validateToken, hotelController.rooms_update_put)
 
 router.put('/:hotelid/bookings', validateToken, hotelController.bookings_put)
 
+router.get(
+  '/:hotelid/statistics',
+  /* validateToken, */ 
+  hotelController.stats_get
+)
+
 router.put('/:hotelid', validateToken, allowAdmin, hotelController.update_put)
 
 router.post(

@@ -2,6 +2,9 @@ const Hotel = require('../models/hotel').model
 const Booking = require('../models/booking').model
 const User = require('../models/user').model
 
+// const moment = require('moment-timezone')
+const mongoose = require('mongoose')
+
 exports.list_get = (req, res) => {
   let query = {}
 
@@ -180,4 +183,50 @@ exports.bookings_put = async (req, res) => {
   }
 
   res.send({ success: true })
+}
+
+exports.stats_get = (req, res) => {
+  let { month, room } = req.query
+  let { hotelid } = req.params
+
+  // let NOW = new moment().tz('Asia/Kolkata')
+
+  let query = {
+    hotel: mongoose.Types.ObjectId(hotelid)
+  }
+
+  if (room) {
+    query.room = mongoose.Types.ObjectId(room)
+  }
+
+  Booking.aggregate([
+    {
+      $match: query
+    },
+    {
+      $group: {
+        _id: { $dateToString: { format: '%Y-%m-%d', date: '$checkIn' } },
+        count: {
+          $sum: 1
+        }
+      }
+    },
+    {
+      $sort: {
+        _id: 1
+      }
+    }
+  ])
+    .then(result => {
+      if (month && !isNaN(month))
+        result = result.filter(
+          item => parseInt(item._id.split('-')[1]) == month
+        )
+
+      return res.send(result)
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).send(err)
+    })
 }

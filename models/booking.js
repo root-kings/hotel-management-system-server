@@ -17,7 +17,6 @@ const BookingSchema = new Schema(
     },
     room: {
       type: Schema.Types.ObjectId,
-      ref: 'Room',
       required: true
     },
     hotel: {
