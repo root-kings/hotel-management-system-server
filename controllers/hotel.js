@@ -1,6 +1,7 @@
 const Hotel = require('../models/hotel').model
 const Booking = require('../models/booking').model
 const User = require('../models/user').model
+const Stat = require('../models/stat').model
 
 // const moment = require('moment-timezone')
 const mongoose = require('mongoose')
@@ -166,16 +167,21 @@ exports.bookings_put = async (req, res) => {
   let newBookings = bookings.filter(b => !b.checkOut)
   let oldBookings = bookings.filter(b => b.checkOut)
 
+  let newStats = []
+
   newBookings.forEach(nb => {
     nb.nedbId = nb._id
     delete nb._id
     nb.hotel = hotelid
+
+    newStats.push({ room: nb.room, hotel: hotelid })
   })
 
   await Booking.insertMany(newBookings)
+  await Stat.insertMany(newStats)
 
   for (let i = 0; i < oldBookings.length; i++) {
-    let bk = await Booking.findOne({ _id: oldBookings[i]._id })
+    let bk = await Booking.findOne({ nedbId: oldBookings[i]._id })
     if (bk) {
       bk.checkOut = oldBookings[i].checkOut
       await bk.save()
@@ -199,13 +205,13 @@ exports.stats_get = (req, res) => {
     query.room = mongoose.Types.ObjectId(room)
   }
 
-  Booking.aggregate([
+  Stat.aggregate([
     {
       $match: query
     },
     {
       $group: {
-        _id: { $dateToString: { format: '%Y-%m-%d', date: '$checkIn' } },
+        _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
         count: {
           $sum: 1
         }
